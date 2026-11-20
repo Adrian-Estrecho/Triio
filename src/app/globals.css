@@ -1,0 +1,924 @@
+@import "tailwindcss";
+
+@theme {
+  /* Triio brand */
+  --color-navy: #111827;
+  --color-sky: #38bdf8;
+  --color-slate-soft: #94a3b8;
+
+  /* Reddit-style neutrals (admin) */
+  --color-ink: #181c1f; /* strong text */
+  --color-ink-weak: #5c6c74; /* secondary text */
+  --color-ink-faint: #8ba2ad; /* hints, placeholders */
+  --color-surface: #ffffff; /* page */
+  --color-surface-2: #f6f8f9; /* panels / right-rail widgets */
+  --color-surface-3: #e5ebee; /* pills, secondary buttons, active nav */
+  --color-surface-4: #d2dadd; /* pressed / hover on pills */
+  --color-line: #e5ebee; /* dividers */
+  --color-line-strong: #d2dadd;
+
+  --font-sans: var(--font-reddit), "Reddit Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-apple: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Helvetica Neue", system-ui, Roboto, sans-serif;
+}
+
+/* Marketing site. Fonts are loaded only on marketing pages (src/app/fonts.ts), so `inline` keeps the
+   utilities pointing at the variables on that page's wrapper. */
+@theme inline {
+  --font-display: var(--font-archivo), "Archivo", ui-sans-serif, system-ui, sans-serif;
+  --font-code: var(--font-jbmono), ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+}
+@theme {
+  --color-paper: #eef2f6; /* page */
+  --color-paper-2: #e2e8ef; /* wells, dividers on paper */
+  --color-slate-ink: #5b6777; /* secondary text on paper */
+  --color-gold: #fbbf24; /* review stars */
+}
+
+html {
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  font-family: var(--font-sans);
+}
+
+/* ───────── Admin controls (Reddit-style) ───────── */
+
+.input {
+  @apply w-full rounded-xl border border-line-strong bg-white px-3.5 py-2.5 text-sm text-ink outline-none transition-[border-color,box-shadow] placeholder:text-ink-faint hover:border-ink-faint focus:border-sky-500 focus:ring-2 focus:ring-sky-200;
+}
+select.input {
+  @apply cursor-pointer;
+}
+.label {
+  @apply mb-1.5 block text-xs font-semibold text-ink-weak;
+}
+
+/* Pill buttons, 40px tall, instant press feedback */
+.btn {
+  @apply inline-flex h-10 cursor-pointer items-center justify-center gap-2 rounded-full px-4 text-sm font-semibold whitespace-nowrap transition-[background-color,transform] duration-100 select-none active:scale-[0.97] disabled:cursor-not-allowed disabled:opacity-50;
+}
+.btn.text-xs {
+  @apply h-8 px-3;
+}
+.btn-primary {
+  @apply bg-navy text-white hover:bg-[#2a3445];
+}
+.btn-accent {
+  @apply bg-sky text-navy hover:bg-sky-300;
+}
+.btn-ghost {
+  @apply bg-surface-3 text-ink hover:bg-surface-4;
+}
+.btn-danger {
+  @apply bg-red-50 text-red-700 hover:bg-red-100;
+}
+
+/* Panels look like Reddit's right-rail widgets: soft gray, rounded, no border */
+.card {
+  @apply rounded-2xl bg-surface-2 p-4 sm:p-5;
+}
+.card .card {
+  @apply bg-white;
+}
+
+.table {
+  @apply w-full text-left text-sm;
+}
+.table th {
+  @apply border-b border-line-strong px-3 py-2.5 text-xs font-semibold text-ink-weak;
+}
+.table td {
+  @apply border-b border-line px-3 py-3 align-top text-ink;
+}
+.table tr:last-child td {
+  @apply border-b-0;
+}
+.table tbody tr {
+  @apply transition-colors;
+}
+.table tbody tr:hover td {
+  @apply bg-surface-3/60;
+}
+
+/* Inline text links inside admin pages */
+.link {
+  @apply font-medium text-sky-700 hover:underline;
+}
+
+/* ───────── Public tap page (iOS-style) ───────── */
+
+.ios {
+  font-family: var(--font-profile, ""), var(--font-apple);
+  -webkit-font-smoothing: antialiased;
+  letter-spacing: -0.011em;
+}
+/* Profile cards: a hairline edge so cells read as surfaces on both themes. */
+.ios-card {
+  overflow: hidden;
+  border-radius: 16px;
+  background: var(--ios-cell);
+  box-shadow: inset 0 0 0 1px var(--ios-hairline), var(--ios-lift);
+}
+.ios-light {
+  --ios-hairline: rgba(0, 0, 0, 0.05);
+  --ios-lift: 0 1px 2px rgba(0, 0, 0, 0.04), 0 4px 16px -8px rgba(0, 0, 0, 0.08);
+}
+.ios-dark {
+  --ios-hairline: rgba(255, 255, 255, 0.06);
+  --ios-lift: 0 0 #0000;
+}
+/* Profile banner. Without a cover photo it's generated from the brand color:
+   a soft mesh, NFC "tap" rings spreading from a corner, and a fine grain. */
+.pf-banner {
+  position: relative;
+  overflow: hidden;
+  border-radius: 28px;
+  isolation: isolate;
+  box-shadow: inset 0 0 0 1px var(--ios-hairline);
+}
+.pf-banner-mesh {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(60% 80% at 12% 10%, color-mix(in srgb, var(--accent) 55%, #fff) 0%, transparent 60%),
+    radial-gradient(70% 90% at 95% 100%, color-mix(in srgb, var(--accent) 55%, #000) 0%, transparent 65%),
+    linear-gradient(135deg, var(--accent) 0%, color-mix(in srgb, var(--accent) 60%, #0b1220) 100%);
+}
+.pf-rings {
+  position: absolute;
+  right: -90px;
+  top: -90px;
+  width: 360px;
+  height: 360px;
+}
+.pf-ring {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 1.5px solid rgba(255, 255, 255, 0.22);
+  transform: scale(var(--s));
+}
+.pf-ring-pulse {
+  border-color: rgba(255, 255, 255, 0.5);
+  animation: pf-pulse 4.5s cubic-bezier(0.2, 0.6, 0.3, 1) infinite;
+}
+.pf-grain {
+  position: absolute;
+  inset: 0;
+  opacity: 0.12;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+}
+@keyframes pf-pulse {
+  0% { opacity: 0; transform: scale(0.15); }
+  15% { opacity: 1; }
+  70%, 100% { opacity: 0; transform: scale(1); }
+}
+
+/* Quick actions as one segmented bar. */
+.pf-seg > a + a {
+  border-left: 1px solid var(--ios-separator);
+}
+.pf-seg > a:active {
+  background: var(--ios-cell-pressed);
+}
+
+/* Review stars light up one after another, once. */
+.pf-star {
+  animation: pf-star 600ms cubic-bezier(0.3, 1.6, 0.5, 1) calc(500ms + var(--i) * 90ms) both;
+}
+@keyframes pf-star {
+  from { opacity: 0.25; transform: scale(0.6); }
+  to { opacity: 1; transform: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pf-ring-pulse { display: none; }
+  .pf-star { animation: none; }
+}
+
+@media (hover: hover) {
+  .pf-seg > a:hover,
+  a.ios-row:hover,
+  a.ios-card:hover {
+    background: color-mix(in srgb, var(--ios-cell) 94%, var(--ios-label));
+  }
+}
+.ios-light {
+  --ios-bg: #f2f2f7;
+  --ios-cell: #ffffff;
+  --ios-cell-pressed: #d1d1d6;
+  --ios-label: #000000;
+  --ios-secondary: rgba(60, 60, 67, 0.6);
+  --ios-tertiary: rgba(60, 60, 67, 0.3);
+  --ios-separator: rgba(60, 60, 67, 0.18);
+}
+.ios-dark {
+  --ios-bg: #000000;
+  --ios-cell: #1c1c1e;
+  --ios-cell-pressed: #3a3a3c;
+  --ios-label: #ffffff;
+  --ios-secondary: rgba(235, 235, 245, 0.6);
+  --ios-tertiary: rgba(235, 235, 245, 0.3);
+  --ios-separator: rgba(84, 84, 88, 0.6);
+}
+
+/* Grouped inset list cell — highlight on touch-down, like UITableView */
+.ios-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-height: 60px;
+  padding: 0 16px;
+  background: var(--ios-cell);
+  color: var(--ios-label);
+  transition: background-color 120ms ease;
+}
+.ios-row:active {
+  background: var(--ios-cell-pressed);
+}
+.ios-row + .ios-row .ios-row-body {
+  border-top: 0.5px solid var(--ios-separator);
+}
+.ios-row-body {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  gap: 8px;
+  align-self: stretch;
+  min-width: 0;
+  padding: 10px 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .btn,
+  .ios-press {
+    transition: none;
+  }
+  .btn:active,
+  .ios-press:active {
+    transform: none;
+  }
+}
+
+/* ───────── Personal card: name intro ─────────
+   Pure CSS so it starts on the very first paint, before any JavaScript loads.
+   Timeline (set from the component): greeting → name letter by letter → rule → tagline → lift away. */
+
+.intro {
+  --ease-out: cubic-bezier(0.2, 0.8, 0.2, 1);
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  background: var(--ios-bg);
+  color: var(--ios-label);
+  cursor: pointer;
+  animation: intro-out 650ms cubic-bezier(0.65, 0, 0.35, 1) calc(var(--intro-exit) + 180ms) forwards;
+}
+.intro.is-skipped {
+  animation: intro-out 320ms ease-out forwards;
+}
+.intro.is-skipped .intro-stage {
+  animation: stage-out 320ms ease-in forwards;
+}
+
+.intro-aurora {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+.intro-orb {
+  position: absolute;
+  width: 78vmax;
+  height: 78vmax;
+  border-radius: 50%;
+  filter: blur(70px);
+  opacity: 0;
+  animation:
+    orb-in 1600ms var(--ease-out) forwards,
+    orb-drift 7s ease-in-out infinite alternate;
+}
+.intro-orb-a {
+  top: -38vmax;
+  left: -30vmax;
+  background: radial-gradient(circle, var(--accent) 0%, transparent 62%);
+}
+.intro-orb-b {
+  bottom: -42vmax;
+  right: -34vmax;
+  background: radial-gradient(circle, var(--accent) 0%, transparent 60%);
+  animation-delay: 150ms, -3.5s;
+  --orb-opacity: 0.45;
+}
+.intro-grain {
+  position: absolute;
+  inset: 0;
+  opacity: 0.07;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+}
+
+.intro-stage {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  max-width: 34rem;
+  padding: 0 28px;
+  text-align: center;
+  animation: stage-out 650ms cubic-bezier(0.7, 0, 0.84, 0) var(--intro-exit) forwards;
+}
+
+.intro-avatar {
+  position: relative;
+  width: 88px;
+  height: 88px;
+  margin-bottom: 28px;
+  animation: avatar-in 900ms cubic-bezier(0.2, 0.9, 0.25, 1.15) 120ms both;
+}
+.intro-avatar-img {
+  position: absolute;
+  inset: 4px;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  border-radius: 50%;
+  font-size: 36px;
+  font-weight: 600;
+}
+/* A thin ring of the accent color that sweeps around the photo. */
+.intro-ring {
+  position: absolute;
+  inset: -6px;
+  border-radius: 50%;
+  background: conic-gradient(from 0deg, transparent 0deg, var(--accent) 300deg, transparent 360deg);
+  -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 2px), #000 calc(100% - 1.5px));
+  mask: radial-gradient(farthest-side, transparent calc(100% - 2px), #000 calc(100% - 1.5px));
+  animation: ring-spin 1800ms cubic-bezier(0.5, 0, 0.3, 1) 250ms both;
+}
+
+.intro-greeting {
+  font-size: 19px;
+  font-weight: 500;
+  color: var(--ios-secondary);
+  animation: rise 800ms var(--ease-out) 480ms both;
+}
+
+.intro-name {
+  margin-top: 6px;
+  font-size: clamp(42px, 13vw, 76px);
+  line-height: 1.02;
+  font-weight: 700;
+  letter-spacing: -0.035em;
+  text-wrap: balance;
+}
+.intro-word {
+  display: inline-block;
+  white-space: nowrap;
+}
+.intro-letter {
+  display: inline-block;
+  animation: letter-in 850ms var(--ease-out) calc(var(--name-start) + var(--i) * var(--step)) both;
+}
+
+.intro-rule {
+  width: 64px;
+  height: 3px;
+  margin-top: 22px;
+  border-radius: 3px;
+  background: linear-gradient(90deg, transparent, var(--accent), transparent);
+  transform-origin: center;
+  animation: rule-in 700ms var(--ease-out) var(--name-end) both;
+}
+
+.intro-tagline {
+  margin-top: 16px;
+  max-width: 26rem;
+  font-size: 17px;
+  line-height: 1.4;
+  color: var(--ios-secondary);
+  animation: rise 800ms var(--ease-out) calc(var(--name-end) + 120ms) both;
+}
+
+.intro-skip {
+  position: absolute;
+  bottom: calc(env(safe-area-inset-bottom) + 28px);
+  left: 50%;
+  translate: -50% 0;
+  padding: 8px 16px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ios-secondary);
+  background: color-mix(in srgb, var(--ios-cell) 70%, transparent);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
+  animation: fade-in 500ms ease 1100ms both;
+}
+
+/* Profile content rises in as the intro leaves. */
+.reveal {
+  animation: reveal-up 800ms cubic-bezier(0.2, 0.8, 0.2, 1) calc(var(--reveal-delay, 0ms) + var(--r, 0) * 70ms) both;
+}
+
+@keyframes orb-in {
+  from { opacity: 0; transform: scale(0.6); }
+  to { opacity: var(--orb-opacity, 0.7); transform: scale(1); }
+}
+@keyframes orb-drift {
+  from { translate: 0 0; }
+  to { translate: 6vmax 4vmax; }
+}
+@keyframes avatar-in {
+  from { opacity: 0; transform: scale(0.55); filter: blur(8px); }
+  to { opacity: 1; transform: scale(1); filter: blur(0); }
+}
+@keyframes ring-spin {
+  from { opacity: 0; transform: rotate(-120deg); }
+  30% { opacity: 1; }
+  to { opacity: 0.9; transform: rotate(240deg); }
+}
+@keyframes rise {
+  from { opacity: 0; transform: translateY(14px); filter: blur(6px); }
+  to { opacity: 1; transform: none; filter: blur(0); }
+}
+@keyframes letter-in {
+  from { opacity: 0; transform: translateY(0.45em) rotate(7deg) scale(0.92); filter: blur(10px); }
+  60% { opacity: 1; }
+  to { opacity: 1; transform: none; filter: blur(0); }
+}
+@keyframes rule-in {
+  from { opacity: 0; transform: scaleX(0); }
+  to { opacity: 1; transform: scaleX(1); }
+}
+@keyframes stage-out {
+  to { opacity: 0; transform: translateY(-36px) scale(1.04); filter: blur(14px); }
+}
+@keyframes intro-out {
+  to { opacity: 0; visibility: hidden; pointer-events: none; }
+}
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes reveal-up {
+  from { opacity: 0; transform: translateY(18px); filter: blur(6px); }
+  to { opacity: 1; transform: none; filter: none; }
+}
+
+/* ───────── New personal card: setup screen ───────── */
+
+.setup-card {
+  animation:
+    setup-card-in 1100ms cubic-bezier(0.2, 0.8, 0.2, 1) both,
+    setup-float 5s ease-in-out 1100ms infinite;
+}
+.setup-wave {
+  position: absolute;
+  inset: 0;
+  border: 1.5px solid var(--accent);
+  border-radius: 50%;
+  opacity: 0;
+  animation: setup-wave 2.4s cubic-bezier(0.2, 0.6, 0.3, 1) infinite;
+}
+.setup-wave:nth-child(2) {
+  animation-delay: 0.8s;
+}
+.setup-wave:nth-child(3) {
+  animation-delay: 1.6s;
+}
+.setup-in {
+  animation: reveal-up 800ms cubic-bezier(0.2, 0.8, 0.2, 1) calc(250ms + var(--r, 0) * 90ms) both;
+}
+
+@keyframes setup-card-in {
+  from { opacity: 0; transform: perspective(800px) rotateX(35deg) rotateZ(-8deg) translateY(40px) scale(0.9); }
+  to { opacity: 1; transform: perspective(800px) rotateX(12deg) rotateZ(-6deg); }
+}
+@keyframes setup-float {
+  0%, 100% { transform: perspective(800px) rotateX(12deg) rotateZ(-6deg) translateY(0); }
+  50% { transform: perspective(800px) rotateX(8deg) rotateZ(-4deg) translateY(-8px); }
+}
+@keyframes setup-wave {
+  from { opacity: 0.8; transform: scale(0.4); }
+  to { opacity: 0; transform: scale(1.5); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .setup-card,
+  .setup-wave,
+  .setup-in {
+    animation: none;
+  }
+  .setup-wave {
+    display: none;
+  }
+}
+
+/* ───────── Owner action sheet (tap the photo) ───────── */
+
+.sheet-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 70;
+  background: rgba(0, 0, 0, 0.4);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 280ms ease;
+}
+.sheet-backdrop[data-open="true"] {
+  opacity: 1;
+  pointer-events: auto;
+}
+.sheet {
+  position: fixed;
+  inset-inline: 0;
+  bottom: 0;
+  z-index: 71;
+  margin: 0 auto;
+  width: 100%;
+  max-width: 28rem;
+  padding: 0 8px calc(env(safe-area-inset-bottom) + 8px);
+  transform: translateY(110%);
+  transition: transform 420ms cubic-bezier(0.32, 0.72, 0, 1);
+}
+.sheet[data-open="true"] {
+  transform: none;
+}
+
+/* ───────── Owner settings (iOS Settings style) ───────── */
+
+.ios-field {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 48px;
+  padding: 0 16px;
+  background: var(--ios-cell);
+}
+.ios-field + .ios-field::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 16px;
+  right: 0;
+  border-top: 0.5px solid var(--ios-separator);
+}
+.ios-field-label {
+  width: 92px;
+  flex-shrink: 0;
+  font-size: 17px;
+  color: var(--ios-label);
+}
+.ios-input {
+  min-width: 0;
+  flex: 1;
+  align-self: stretch;
+  padding: 12px 0;
+  background: transparent;
+  font-size: 17px; /* 16px+ stops iOS from zooming in */
+  color: var(--ios-label);
+  outline: none;
+}
+.ios-input::placeholder {
+  color: var(--ios-tertiary);
+}
+textarea.ios-input {
+  min-height: 112px;
+  resize: vertical;
+  line-height: 1.4;
+}
+
+.ios-switch {
+  position: relative;
+  width: 51px;
+  height: 31px;
+  flex-shrink: 0;
+  appearance: none;
+  border-radius: 999px;
+  background: var(--ios-fill);
+  cursor: pointer;
+  transition: background-color 250ms ease;
+}
+.ios-switch::after {
+  content: "";
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 27px;
+  height: 27px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15), 0 3px 1px rgba(0, 0, 0, 0.06);
+  transition: transform 300ms cubic-bezier(0.3, 0.7, 0.3, 1);
+}
+.ios-switch:checked {
+  background: #34c759;
+}
+.ios-switch:checked::after {
+  transform: translateX(20px);
+}
+.ios-switch:focus-visible,
+.ios-input:focus-visible {
+  outline: none;
+}
+.ios-field:focus-within {
+  background: color-mix(in srgb, var(--ios-cell) 92%, var(--ios-label));
+}
+
+.ios-light {
+  --ios-fill: rgba(120, 120, 128, 0.16);
+}
+.ios-dark {
+  --ios-fill: rgba(120, 120, 128, 0.36);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .intro {
+    display: none;
+  }
+  .reveal {
+    animation: none;
+  }
+  .sheet,
+  .sheet-backdrop,
+  .ios-switch,
+  .ios-switch::after {
+    transition: none;
+  }
+}
+
+/* ───────── Marketing site ───────── */
+
+.display {
+  font-family: var(--font-display);
+  font-stretch: 118%;
+  font-weight: 700;
+  letter-spacing: -0.035em;
+  line-height: 0.98;
+  text-wrap: balance;
+}
+.mk-focus:focus-visible,
+.mk :where(a, button, summary, input, select, textarea):focus-visible {
+  outline: 2px solid #0284c7;
+  outline-offset: 3px;
+}
+
+/* A printed Triio card. Sizes inside are in cqw so it scales with its own width. */
+.nfc-card {
+  container-type: inline-size;
+  position: relative;
+  aspect-ratio: 85.6 / 54;
+  overflow: hidden;
+  border-radius: 5.5% / 8.7%; /* % of its own width / height: cqw here would measure the parent */
+  color: #fff;
+  background:
+    radial-gradient(120% 90% at 100% 0%, rgba(56, 189, 248, 0.28), transparent 55%),
+    radial-gradient(90% 80% at 0% 100%, rgba(56, 189, 248, 0.1), transparent 60%),
+    linear-gradient(160deg, #1b2537 0%, #111827 55%, #0b111d 100%);
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.14);
+}
+.nfc-card[data-tone="light"] {
+  color: #111827;
+  background:
+    radial-gradient(120% 90% at 100% 0%, rgba(56, 189, 248, 0.35), transparent 55%),
+    linear-gradient(160deg, #ffffff 0%, #f1f5f9 100%);
+  box-shadow: inset 0 0 0 1px rgba(17, 24, 39, 0.08);
+}
+/* Soft sheen that sits on top like a laminate. */
+.nfc-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(115deg, transparent 30%, rgba(255, 255, 255, 0.09) 45%, transparent 60%);
+}
+
+/* ── Hero: the tap ──────────────────────────────────────────────── */
+
+.tap-stage {
+  --loop: 7.5s;
+  container-type: inline-size;
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1 / 0.95;
+}
+.tap-counter {
+  position: absolute;
+  left: 2cqw;
+  right: 6cqw;
+  top: 40cqw;
+  height: 52cqw;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgba(17, 24, 39, 0.16), transparent);
+  filter: blur(6px);
+}
+.tap-plane {
+  position: absolute;
+  left: 8cqw;
+  top: 36cqw;
+  width: 50cqw;
+  transform: perspective(1400px) rotateX(56deg) rotateZ(-24deg);
+  transform-style: preserve-3d;
+}
+.tap-plane .nfc-card,
+.tap-plane .review-plate {
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.08),
+    0 2px 0 #050910,
+    0 30px 50px -12px rgba(17, 24, 39, 0.45);
+}
+.tap-ring {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 70cqw;
+  aspect-ratio: 1;
+  margin: -35cqw 0 0 -35cqw;
+  border-radius: 50%;
+  border: 2px solid #38bdf8;
+  opacity: 0;
+  animation: tap-ring var(--loop) cubic-bezier(0.2, 0.6, 0.3, 1) infinite;
+}
+.tap-ring:nth-child(2) { animation-delay: 0.22s; }
+.tap-ring:nth-child(3) { animation-delay: 0.44s; }
+
+.tap-phone {
+  position: absolute;
+  left: 58cqw;
+  top: 2cqw;
+  width: 34cqw;
+  aspect-ratio: 9 / 18.6;
+  padding: 1.3cqw;
+  border-radius: 6cqw;
+  background: #0b0f17;
+  box-shadow:
+    inset 0 0 0 0.5cqw #2a3344,
+    0 40px 60px -20px rgba(17, 24, 39, 0.55),
+    0 12px 24px -10px rgba(17, 24, 39, 0.35);
+  transform: rotate(9deg);
+  animation: tap-phone var(--loop) cubic-bezier(0.65, 0, 0.35, 1) infinite;
+  will-change: transform;
+}
+.tap-screen {
+  position: relative;
+  height: 100%;
+  overflow: hidden;
+  border-radius: 4.8cqw;
+  background: #f2f2f7;
+}
+.tap-screen-lock,
+.tap-screen-review {
+  position: absolute;
+  inset: 0;
+}
+.tap-screen-lock {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-top: 9cqw;
+  color: #fff;
+  background: linear-gradient(170deg, #1f3b5c, #111827 70%);
+  animation: tap-lock var(--loop) ease infinite;
+}
+.tap-screen-review {
+  opacity: 0;
+  animation: tap-review var(--loop) cubic-bezier(0.2, 0.8, 0.2, 1) infinite;
+}
+.tap-star {
+  color: #d1d5db;
+  animation: tap-star var(--loop) cubic-bezier(0.3, 1.6, 0.5, 1) infinite;
+  animation-delay: calc(var(--i) * 0.13s);
+}
+.tap-toast {
+  position: absolute;
+  z-index: 2;
+  left: 1cqw;
+  top: 24cqw;
+  opacity: 0;
+  animation: tap-toast var(--loop) cubic-bezier(0.2, 0.8, 0.2, 1) infinite;
+}
+
+@keyframes tap-phone {
+  0%, 10% { transform: rotate(9deg); }
+  28%, 64% { transform: translate(-25cqw, 11cqw) rotate(-5deg); }
+  84%, 100% { transform: rotate(9deg); }
+}
+@keyframes tap-ring {
+  0%, 27% { opacity: 0; transform: scale(0.25); }
+  29% { opacity: 0.9; transform: scale(0.25); }
+  48% { opacity: 0; transform: scale(1.35); }
+  100% { opacity: 0; transform: scale(1.35); }
+}
+@keyframes tap-lock {
+  0%, 30% { opacity: 1; }
+  34%, 92% { opacity: 0; }
+  97%, 100% { opacity: 1; }
+}
+@keyframes tap-review {
+  0%, 30% { opacity: 0; transform: translateY(8%); }
+  35%, 90% { opacity: 1; transform: none; }
+  96%, 100% { opacity: 0; transform: none; }
+}
+@keyframes tap-star {
+  0%, 41% { color: #d1d5db; transform: scale(0.8); }
+  45% { color: #fbbf24; transform: scale(1.3); }
+  49%, 90% { color: #fbbf24; transform: scale(1); }
+  96%, 100% { color: #d1d5db; transform: scale(0.8); }
+}
+@keyframes tap-toast {
+  0%, 55% { opacity: 0; transform: translateY(14px) scale(0.92); }
+  60%, 86% { opacity: 1; transform: none; }
+  92%, 100% { opacity: 0; transform: translateY(-10px); }
+}
+
+/* The link that never changes, with destinations that do. */
+.dest-cycle {
+  animation: dest-cycle 9s cubic-bezier(0.65, 0, 0.35, 1) infinite;
+}
+@keyframes dest-cycle {
+  0%, 28% { transform: translateY(0); }
+  33%, 61% { transform: translateY(-33.333%); }
+  66%, 94% { transform: translateY(-66.666%); }
+  100% { transform: translateY(0); }
+}
+
+/* Section entrance (CSS only: content is visible even if JavaScript never runs). */
+@supports (animation-timeline: view()) {
+  .mk-rise {
+    animation: reveal-up linear both;
+    animation-timeline: view();
+    animation-range: entry 0% entry 40%;
+  }
+}
+
+.mk details summary::-webkit-details-marker { display: none; }
+.mk details[open] .faq-plus { transform: rotate(45deg); }
+
+@media (prefers-reduced-motion: reduce) {
+  .tap-phone,
+  .tap-ring,
+  .tap-screen-lock,
+  .tap-screen-review,
+  .tap-star,
+  .tap-toast,
+  .dest-cycle,
+  .mk-rise {
+    animation: none;
+  }
+  .tap-phone { transform: translate(-25cqw, 11cqw) rotate(-5deg); }
+  .tap-screen-lock { opacity: 0; }
+  .tap-screen-review,
+  .tap-toast { opacity: 1; }
+  .tap-star { color: #fbbf24; }
+}
+
+/* ── The review plate (the real product: square, colored band, 3M foam back) ── */
+
+@property --band {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: #1d4fc4;
+}
+.review-plate {
+  container-type: inline-size;
+  position: relative;
+  aspect-ratio: 1;
+  overflow: hidden;
+  border-radius: 7%; /* % of its own size: cqw here would measure the parent */
+  background: #fff;
+  color: #111;
+  box-shadow:
+    inset 0 0 0 1px rgba(17, 24, 39, 0.06),
+    0 1px 0 rgba(17, 24, 39, 0.08);
+  transition: --band 450ms cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+/* Gloss, like the laminate on the printed plate. */
+.review-plate::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(125deg, rgba(255, 255, 255, 0.22) 0%, transparent 32%, transparent 70%, rgba(255, 255, 255, 0.12) 100%);
+}
+/* The peel-off foam liner behind a plate. */
+.plate-liner {
+  position: absolute;
+  inset: 0;
+  border-radius: 7%;
+  background:
+    radial-gradient(circle at 30% 30%, rgba(56, 120, 220, 0.16) 0 6%, transparent 6.5%) 0 0 / 22% 22%,
+    #f4f6f8;
+  box-shadow: inset 0 0 0 1px rgba(17, 24, 39, 0.08), 0 18px 30px -18px rgba(17, 24, 39, 0.45);
+}
+@media (prefers-reduced-motion: reduce) {
+  .review-plate { transition: none; }
+}
