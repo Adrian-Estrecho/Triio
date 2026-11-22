@@ -1,4 +1,12 @@
-import { Archivo, Inter, JetBrains_Mono } from "next/font/google";
+import { Archivo, Cormorant_Garamond, Inter, JetBrains_Mono } from "next/font/google";
+
+/** Business profiles: the brand name in an elegant, high-contrast serif over the hero photo. */
+export const brandSerif = Cormorant_Garamond({
+  subsets: ["latin"],
+  weight: ["500", "600"],
+  variable: "--font-brand",
+  display: "swap",
+});
 
 /** Public profile font: close to SF Pro, so the card looks the same on iPhone, Android and desktop. */
 export const profileFont = Inter({

@@ -22,6 +22,9 @@ export type PublicProfile = {
   messenger: string | null;
   whatsapp: string | null;
   viber: string | null;
+  /** Missing until supabase/socials.sql is run. */
+  youtube?: string | null;
+  linkedin?: string | null;
   links: ProfileLink[];
   accent_color: string;
   theme: "dark" | "light";
@@ -29,6 +32,61 @@ export type PublicProfile = {
   kind?: "business" | "personal";
   intro_enabled?: boolean;
   intro_greeting?: string | null;
+  /** QR passes for the Wallet tab (personal cards). Missing until supabase/wallet.sql is run. */
+  wallet?: WalletPass[];
+  /** In-game IDs (CODM, MLBB…). Missing until supabase/games.sql is run. */
+  games?: GameId[];
+  /** Products & services on a business profile. Missing until supabase/offerings.sql is run. */
+  offerings?: Offering[];
+  /** Heading above them (default "What we offer"). */
+  offerings_title?: string | null;
+};
+
+/** One product or service a business offers. */
+export type Offering = {
+  id: string;
+  title: string;
+  /** Free text, e.g. "₱2,500" or "From ₱350". */
+  price?: string | null;
+  /** Used for the filter chips, e.g. "Manicure". */
+  category?: string | null;
+  description?: string | null;
+  image?: string | null;
+  /** Where "Order" / "Book" goes (shop, booking page). */
+  url?: string | null;
+};
+
+/** One game the owner plays, with the ID friends need to add them. */
+export type GameId = {
+  /** A key from GAMES in lib/games.ts ("other" = a game typed by the owner). */
+  game: string;
+  /** Game name, only for "other". */
+  title?: string | null;
+  /** In-game name. */
+  ign?: string | null;
+  uid: string;
+  /** Second ID part some games need, e.g. MLBB's Zone ID. */
+  server?: string | null;
+};
+
+export type WalletKind = "gcash" | "maya" | "bank" | "link" | "profile" | "custom";
+
+/** One card in the owner's Wallet. Every saved pass has a QR: text to encode, or an uploaded image. */
+export type WalletPass = {
+  id: string;
+  kind: WalletKind;
+  title: string;
+  /** Account name, e.g. "Maria Santos". */
+  name?: string | null;
+  /** Account number or handle, e.g. "0917 123 4567". */
+  number?: string | null;
+  color: string;
+  qr_text?: string | null;
+  qr_image?: string | null;
+  /** Which bank or e-wallet (an id from BANKS in lib/wallet.ts), for "bank" passes. */
+  bank?: string | null;
+  /** Small logo the owner uploaded, shown in the card's corner tile. */
+  logo?: string | null;
 };
 
 export type Profile = PublicProfile & {

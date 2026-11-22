@@ -6,6 +6,7 @@ import type { Profile } from "@/lib/types";
 import { linksToText } from "@/lib/utils";
 import { Checkbox, Field, PageHeader, Select, TextArea } from "@/components/admin/fields";
 import { CopyButton, SubmitButton } from "@/components/admin/ui";
+import { OfferingsEditor } from "@/components/admin/OfferingsEditor";
 import { createCards, deleteProfile, updateProfile } from "../../actions";
 
 export default async function ProfileEditPage({ params }: { params: Promise<{ id: string }> }) {
@@ -103,9 +104,11 @@ export default async function ProfileEditPage({ params }: { params: Promise<{ id
               <Field label="Facebook" name="facebook" defaultValue={p.facebook} placeholder="facebook.com/yourpage" />
               <Field label="Instagram" name="instagram" defaultValue={p.instagram} placeholder="instagram.com/yourpage" />
               <Field label="TikTok" name="tiktok" defaultValue={p.tiktok} />
-              <Field label="Messenger" name="messenger" defaultValue={p.messenger} placeholder="m.me/yourpage" />
-              <Field label="WhatsApp" name="whatsapp" defaultValue={p.whatsapp} placeholder="wa.me/63917…" />
-              <Field label="Viber" name="viber" defaultValue={p.viber} />
+              <Field label="YouTube" name="youtube" defaultValue={p.youtube ?? null} placeholder="youtube.com/@yourchannel" />
+              <Field label="LinkedIn" name="linkedin" defaultValue={p.linkedin ?? null} placeholder="linkedin.com/in/… or /company/…" />
+              <Field label="Messenger (for “Ask about this” on products)" name="messenger" defaultValue={p.messenger} placeholder="m.me/yourpage" />
+              <Field label="WhatsApp (for “Ask about this” on products)" name="whatsapp" defaultValue={p.whatsapp} placeholder="wa.me/63917…" />
+              <Field label="Viber (for “Ask about this” on products)" name="viber" defaultValue={p.viber} />
               <TextArea
                 label="Custom buttons — one per line: Label | link"
                 name="links"
@@ -116,6 +119,16 @@ export default async function ProfileEditPage({ params }: { params: Promise<{ id
               />
             </div>
           </section>
+
+          {p.kind !== "personal" && (
+            <section className="card space-y-4">
+              <div>
+                <h2 className="font-semibold">Products &amp; services</h2>
+                <p className="text-sm text-ink-weak">Shown as a photo grid on the business page. Tapping one opens its details with an Order / Ask button.</p>
+              </div>
+              <OfferingsEditor initial={Array.isArray(p.offerings) ? p.offerings : []} title={p.offerings_title ?? null} ready={"offerings" in p} />
+            </section>
+          )}
 
           <div className="sticky bottom-4 z-10 flex justify-end">
             <SubmitButton className="btn btn-primary shadow-lg">Save profile</SubmitButton>

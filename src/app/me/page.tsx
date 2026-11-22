@@ -49,5 +49,8 @@ export default async function MySettingsPage({ searchParams }: { searchParams: P
   }
 
   const { welcome } = await searchParams;
-  return <SettingsForm profile={profile} email={user.email ?? ""} welcome={welcome === "1"} shareUrl={`${siteUrl()}/p/${profile.slug}`} />;
+  return <SettingsForm profile={profile} email={user.email ?? ""} welcome={welcome === "1"} shareUrl={`${siteUrl()}/p/${profile.slug}`}
+      walletReady={"wallet" in profile}
+      gamesReady={"games" in profile}
+    />;
 }

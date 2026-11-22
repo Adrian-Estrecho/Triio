@@ -31,9 +31,9 @@ export const PAYMENT_METHODS = ["GCash", "Maya", "Cash", "Bank transfer", "Other
 
 export const CARD_TYPES = [
   { value: "review", label: "Review card → Google review link" },
-  { value: "profile", label: "Profile card → digital profile" },
+  { value: "profile", label: "Business card → business page (brand hero + products & services)" },
   { value: "link", label: "Link card → any URL" },
-  { value: "personal", label: "Personal card → owner sets up their own profile" },
+  { value: "personal", label: "Personal card → personal brand page (owner sets it up)" },
 ] as const;
 
 export const CARD_STATUSES = [

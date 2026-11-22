@@ -1,7 +1,14 @@
-import { randomInt } from "crypto";
-
 // No 0/O/1/I/L so codes are easy to read aloud and type.
 const CODE_ALPHABET = "ABCDEFGHJKMNPQRSTUVWXYZ23456789";
+
+/** Uniform random integer in [0, max) from the Web Crypto API (works on the server and in the browser). */
+function randomInt(max: number) {
+  const limit = Math.floor(0x100000000 / max) * max; // reject the biased tail
+  const buf = new Uint32Array(1);
+  do globalThis.crypto.getRandomValues(buf);
+  while (buf[0] >= limit);
+  return buf[0] % max;
+}
 
 export function generateCardCode(length = 6) {
   let out = "";
@@ -103,4 +110,9 @@ export function matches(q: string | undefined, ...fields: (string | null | undef
   if (!q?.trim()) return true;
   const hay = fields.filter(Boolean).join(" ").toLowerCase();
   return q.toLowerCase().split(/\s+/).filter(Boolean).every((w) => hay.includes(w));
+}
+
+/** An image we can show: a web link, or a local blob: preview of a file that hasn't been uploaded yet. */
+export function isImageSrc(url: string | null | undefined): url is string {
+  return Boolean(url && (url.startsWith("blob:") || isSafeHttpUrl(url)));
 }

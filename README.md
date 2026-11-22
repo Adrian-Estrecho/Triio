@@ -44,7 +44,12 @@ You can change where a card goes, or turn it off, from the admin dashboard. You 
 2. Open **SQL Editor → New query**, paste everything in `supabase/schema.sql`, and click **Run**.
 3. In another new query, paste everything in `supabase/automations.sql` and **Run**. This adds the lead finder, emails, concerns and alerts.
 4. In another new query, paste everything in `supabase/web-orders.sql` and **Run**. This lets customers order on the website (`/order`).
-5. Optional demo data: in a new query, paste `supabase/seed.sql` and **Run**.
+5. In another new query, paste everything in `supabase/wallet.sql` and **Run**. This adds the **Wallet** (QR cards) to personal profiles.
+6. In another new query, paste everything in `supabase/games.sql` and **Run**. This adds **Game IDs** (CODM, MLBB…) to personal profiles.
+7. In another new query, paste everything in `supabase/offerings.sql` and **Run**. This adds **Products & services** to business profiles.
+8. In another new query, paste everything in `supabase/socials.sql` and **Run**. This adds **YouTube** and **LinkedIn** to the social links.
+   Steps 5–8 can be run in any order, and running one again is safe.
+9. Optional demo data: in a new query, paste `supabase/seed.sql` and **Run**.
 
 ## 3. Create your admin login
 
@@ -150,7 +155,8 @@ The home page shows the cards and prices, and **Order a card** opens `/order`. A
 2. Open the card and click **Print packaging insert**. It prints a 95 × 140 mm insert with "Hi {name}!", three setup steps, their private **setup code** and a QR backup. Print at 100%, cut it out and pack it with the card.
 3. On the first tap, the card greets them: **"Hi Maria, your card is ready"**. Their name is already filled in, so they enter the setup code, their email and a password. The card is now theirs, and it opens their profile.
 4. To edit later, they tap **their photo** on the card and choose **Edit Profile**. They log in if needed, then change their photo, details, links, colors and intro in **Settings** (`/me`).
-5. Lost access, or gave the card away? On the card page, click **Reset setup (new code)**. Their old profile is kept, and the card shows the setup screen again.
+5. **Wallet:** in Settings, the bottom bar has **Profile** and **Wallet**. In Wallet they tap **Add a card** and pick GCash, Maya, Bank, My card, Link or Other. They upload a screenshot of their QR (the QR is read and redrawn sharp; if it can't be read, the image is shown as is) or paste a link. Once a card has a QR, their public card gets a **Profile | Wallet** tab bar. On the Wallet tab, tapping a card flips it to show the QR. With no cards, the tab bar doesn't show. Up to 8 cards.
+6. Lost access, or gave the card away? On the card page, click **Reset setup (new code)**. Their old profile is kept, and the card shows the setup screen again.
 
 ## Getting the Google review link
 
@@ -180,6 +186,13 @@ src/app/order              public order page + its action (calls submit_order)
 src/components/marketing   home page pieces: the tap animation, card renders, header/footer
 src/lib/shop.ts            what the website sells (names, copy; prices come from constants.ts)
 supabase/web-orders.sql    orders.source + submit_order() for website orders
+supabase/wallet.sql        profiles.wallet (QR cards) for personal profiles
+supabase/games.sql         profiles.games (in-game IDs) for personal profiles
+supabase/offerings.sql     profiles.offerings (products & services) for business profiles
+supabase/socials.sql       profiles.youtube, profiles.linkedin (social links)
+src/components/profile     the two page styles: PersonalLayout (photo + glass), BusinessLayout (brand hero + offerings)
+src/components/wallet      the Wallet tab: card stack with flip-to-QR, Profile | Wallet tab bar
+src/app/me                 owner settings: profile editor, wallet editor, live preview
 src/app/api/cron/daily     the 8:00 AM job
 src/lib/automation         lead finder, alerts, daily run, email triggers
 src/lib/email              sending (Resend) and email templates

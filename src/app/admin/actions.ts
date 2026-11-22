@@ -4,7 +4,8 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { requireAdmin, check } from "@/lib/admin";
 import { PRODUCTS } from "@/lib/constants";
-import type { CardType } from "@/lib/types";
+import type { CardType, Offering } from "@/lib/types";
+import { cleanOfferings } from "@/lib/offerings";
 import { maybeSendOrderUpdate, maybeSendWelcome } from "@/lib/automation/hooks";
 import { generateCardCode, isSafeHttpUrl, normalizeUrl, num, parseLinks, slugify, str, todayISO } from "@/lib/utils";
 
@@ -79,7 +80,7 @@ async function uploadAsset(db: Awaited<ReturnType<typeof admin>>, file: FormData
   if (!file.type.startsWith("image/")) throw new Error("Please upload an image file (PNG, JPG, WEBP or SVG).");
   if (file.size > 4 * 1024 * 1024) throw new Error("Image is too big — keep it under 4 MB.");
   const ext = (file.name.split(".").pop() || "png").toLowerCase().replace(/[^a-z0-9]/g, "");
-  const path = `${folder}/${Date.now()}.${ext}`;
+  const path = `${folder}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
   check(
     await db.storage.from("brand-assets").upload(path, file, { contentType: file.type, upsert: true }),
     "Upload image"
@@ -126,6 +127,8 @@ export async function updateProfile(f: FormData) {
     facebook: normalizeUrl(f.get("facebook")),
     instagram: normalizeUrl(f.get("instagram")),
     tiktok: normalizeUrl(f.get("tiktok")),
+    youtube: normalizeUrl(f.get("youtube")),
+    linkedin: normalizeUrl(f.get("linkedin")),
     messenger: normalizeUrl(f.get("messenger")),
     whatsapp: normalizeUrl(f.get("whatsapp")),
     viber: normalizeUrl(f.get("viber")),
@@ -135,9 +138,17 @@ export async function updateProfile(f: FormData) {
     is_active: f.get("is_active") === "on",
   };
 
-  for (const key of ["website", "maps_url", "review_url", "facebook", "instagram", "tiktok", "messenger", "whatsapp", "viber"]) {
+  for (const key of ["website", "maps_url", "review_url", "facebook", "instagram", "tiktok", "youtube", "linkedin", "messenger", "whatsapp", "viber"]) {
     const v = update[key] as string | null;
     if (v && !isSafeHttpUrl(v)) throw new Error(`"${key}" must be a web link starting with https://`);
+  }
+
+  // YouTube and LinkedIn need supabase/socials.sql. Before that, saving without them still works.
+  const { data: row } = await db.from("profiles").select("*").eq("id", profileId).maybeSingle();
+  if (row && !("youtube" in row)) {
+    if (update.youtube || update.linkedin) throw new Error("Run supabase/socials.sql in Supabase first, then save again.");
+    delete update.youtube;
+    delete update.linkedin;
   }
 
   const logo = await uploadAsset(db, f.get("logo"), `logos/${profileId}`);
@@ -147,6 +158,26 @@ export async function updateProfile(f: FormData) {
   const cover = await uploadAsset(db, f.get("cover"), `covers/${profileId}`);
   if (cover) update.cover_url = cover;
   else if (f.get("remove_cover") === "on") update.cover_url = null;
+
+  // Products & services (business profiles). Each new photo arrives as offering_img_<id>.
+  if (f.has("offerings")) {
+    const { data: current } = await db.from("profiles").select("*").eq("id", profileId).maybeSingle<{ offerings?: Offering[] }>();
+    if (!current || !("offerings" in current)) throw new Error("Run supabase/offerings.sql in Supabase first, then save again.");
+    let items: unknown;
+    try {
+      items = JSON.parse(String(f.get("offerings")));
+    } catch {
+      throw new Error("Products & services couldn't be read. Reload the page and try again.");
+    }
+    const uploaded: Record<string, string> = {};
+    for (const raw of Array.isArray(items) ? (items as { id?: unknown }[]) : []) {
+      if (typeof raw?.id !== "string" || !/^[a-z0-9]{4,24}$/.test(raw.id)) continue;
+      const url = await uploadAsset(db, f.get(`offering_img_${raw.id}`), `offerings/${profileId}`);
+      if (url) uploaded[raw.id] = url;
+    }
+    update.offerings = cleanOfferings(items, current.offerings ?? [], uploaded);
+    update.offerings_title = str(f.get("offerings_title"))?.slice(0, 40) ?? null;
+  }
 
   check(await db.from("profiles").update(update).eq("id", profileId), "Save profile");
   revalidatePath(`/admin/profiles/${profileId}`);

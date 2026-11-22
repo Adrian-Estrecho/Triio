@@ -13,12 +13,15 @@ export function OwnerEditSheet({
   loggedIn,
   name,
   accent,
+  badge = true,
   children,
 }: {
   isOwner: boolean;
   loggedIn: boolean;
   name: string;
   accent: string;
+  /** Show the pencil badge on the photo for the owner (off when the trigger is already a menu button). */
+  badge?: boolean;
   children: React.ReactNode;
 }) {
   const [open, setOpen] = useState(false);
@@ -47,18 +50,18 @@ export function OwnerEditSheet({
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="relative cursor-pointer rounded-[26px] transition-transform duration-150 ease-out active:scale-[0.96] motion-reduce:transition-none"
+        className="relative cursor-pointer rounded-full transition-transform duration-150 ease-out active:scale-[0.96] motion-reduce:transition-none"
         aria-label={isOwner ? "Edit your profile" : `${name} — edit profile`}
         aria-haspopup="dialog"
       >
         {children}
-        {isOwner && (
+        {isOwner && badge && (
           <span
-            className="absolute right-0.5 bottom-0.5 flex h-8 w-8 items-center justify-center rounded-full shadow-[0_2px_8px_rgba(0,0,0,0.25)]"
-            style={{ background: accent, boxShadow: "0 0 0 3px var(--ios-bg)" }}
+            className="absolute -right-1.5 -bottom-1.5 flex h-6 w-6 items-center justify-center rounded-full"
+            style={{ background: accent, boxShadow: "0 0 0 2px #fff, 0 3px 8px rgba(0,0,0,0.3)" }}
             aria-hidden="true"
           >
-            <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="#fff" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+            <svg viewBox="0 0 24 24" className="h-3 w-3" fill="none" stroke="#fff" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round">
               <path d="M4 20h4L19 9a2.8 2.8 0 0 0-4-4L4 16v4Z" />
             </svg>
           </span>

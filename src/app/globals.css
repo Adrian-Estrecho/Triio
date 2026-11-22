@@ -128,54 +128,482 @@ select.input {
   --ios-hairline: rgba(255, 255, 255, 0.06);
   --ios-lift: 0 0 #0000;
 }
-/* Profile banner. Without a cover photo it's generated from the brand color:
-   a soft mesh, NFC "tap" rings spreading from a corner, and a fine grain. */
-.pf-banner {
-  position: relative;
-  overflow: hidden;
-  border-radius: 28px;
-  isolation: isolate;
-  box-shadow: inset 0 0 0 1px var(--ios-hairline);
-}
+/* ───────── Public profile: shared pieces ───────── */
+
+/* Generated art when there's no photo: a soft mesh in the brand color with fine grain. */
 .pf-banner-mesh {
   position: absolute;
   inset: 0;
   background:
     radial-gradient(60% 80% at 12% 10%, color-mix(in srgb, var(--accent) 55%, #fff) 0%, transparent 60%),
     radial-gradient(70% 90% at 95% 100%, color-mix(in srgb, var(--accent) 55%, #000) 0%, transparent 65%),
-    linear-gradient(135deg, var(--accent) 0%, color-mix(in srgb, var(--accent) 60%, #0b1220) 100%);
-}
-.pf-rings {
-  position: absolute;
-  right: -90px;
-  top: -90px;
-  width: 360px;
-  height: 360px;
-}
-.pf-ring {
-  position: absolute;
-  inset: 0;
-  border-radius: 50%;
-  border: 1.5px solid rgba(255, 255, 255, 0.22);
-  transform: scale(var(--s));
-}
-.pf-ring-pulse {
-  border-color: rgba(255, 255, 255, 0.5);
-  animation: pf-pulse 4.5s cubic-bezier(0.2, 0.6, 0.3, 1) infinite;
+    linear-gradient(135deg, var(--accent) 0%, color-mix(in srgb, var(--accent) 74%, #000) 100%);
 }
 .pf-grain {
   position: absolute;
   inset: 0;
-  opacity: 0.12;
+  opacity: 0.14;
   mix-blend-mode: overlay;
+  pointer-events: none;
   background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
 }
-@keyframes pf-pulse {
-  0% { opacity: 0; transform: scale(0.15); }
-  15% { opacity: 1; }
-  70%, 100% { opacity: 0; transform: scale(1); }
+
+/* Socials: one line, always. A single pill split into equal slots, one brand dot per slot. */
+.pf-socials {
+  display: flex;
+  align-items: stretch;
+  height: 54px;
+  padding: 0 4px;
+  border-radius: 999px;
+  background: var(--ios-cell);
+  box-shadow: inset 0 0 0 1px var(--ios-hairline), var(--ios-lift);
+}
+.pf-socials-item {
+  position: relative;
+  display: grid;
+  flex: 1 1 0;
+  min-width: 0;
+  place-items: center;
+  border-radius: 999px;
+  transition: background-color 150ms ease;
+}
+.pf-socials-item + .pf-socials-item::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 16px;
+  bottom: 16px;
+  width: 1px;
+  background: var(--ios-separator);
+}
+.pf-socials-dot {
+  display: grid;
+  width: 34px;
+  height: 34px;
+  place-items: center;
+  border-radius: 50%;
+  color: #fff;
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.14), 0 4px 10px -4px rgba(0, 0, 0, 0.45);
+  transition: transform 300ms cubic-bezier(0.3, 1.5, 0.5, 1);
+}
+.pf-socials-item:active .pf-socials-dot {
+  transform: scale(0.88);
 }
 
+/* Game tag (CODM, MLBB…) and the Copy pill. */
+.pf-game-tile {
+  display: grid;
+  flex-shrink: 0;
+  width: 42px;
+  height: 42px;
+  place-items: center;
+  border-radius: 12px;
+  font-size: 10.5px;
+  font-weight: 800;
+  font-stretch: 112%;
+  letter-spacing: -0.01em;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.22), inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+}
+.pf-copy {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: 6px;
+  height: 34px;
+  padding: 0 12px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  color: inherit;
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, currentColor 22%, transparent);
+  transition: background-color 200ms ease, color 200ms ease, box-shadow 200ms ease, transform 120ms ease;
+}
+.pf-copy:active {
+  transform: scale(0.94);
+}
+.pf-copy[data-copied] {
+  background: var(--accent);
+  color: var(--on-accent);
+  box-shadow: none;
+}
+
+/* Review prompt as a ticket: notched sides and a perforated rule above the stars. */
+.pf-ticket {
+  position: relative;
+  display: block;
+  overflow: hidden;
+  padding: 18px 20px 20px;
+  border-radius: 24px;
+  background: var(--ios-cell);
+  box-shadow: inset 0 0 0 1px var(--ios-hairline), var(--ios-lift);
+  -webkit-mask: radial-gradient(circle 9px at 0 calc(100% - 56px), transparent 98%, #000) left / 51% 100% no-repeat,
+    radial-gradient(circle 9px at 100% calc(100% - 56px), transparent 98%, #000) right / 51% 100% no-repeat;
+  mask: radial-gradient(circle 9px at 0 calc(100% - 56px), transparent 98%, #000) left / 51% 100% no-repeat,
+    radial-gradient(circle 9px at 100% calc(100% - 56px), transparent 98%, #000) right / 51% 100% no-repeat;
+}
+.pf-ticket::after {
+  content: "";
+  position: absolute;
+  left: 16px;
+  right: 16px;
+  bottom: 56px;
+  border-top: 1.5px dashed var(--ios-separator);
+}
+.pf-star {
+  animation: pf-star 600ms cubic-bezier(0.3, 1.6, 0.5, 1) calc(var(--reveal-delay, 0ms) + 500ms + var(--i) * 90ms) both;
+}
+@keyframes pf-star {
+  from { opacity: 0.25; transform: scale(0.6); }
+  to { opacity: 1; transform: none; }
+}
+
+/* ───────── Personal brand (photo-first) ───────── */
+
+/* Surfaces (cards, the profile card): solid, a step lighter than the page, which is tinted
+   with the owner's colour. No blur. */
+.pp-glass {
+  background: color-mix(in srgb, #fff 7%, var(--pf-bg, #0b0c10));
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.06);
+  color: #fff;
+}
+.ios-light .pp-glass {
+  background: #fff;
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.05), 0 8px 24px -18px rgba(0, 0, 0, 0.25);
+  color: var(--ios-label);
+}
+/* Round buttons always sit on a photo: a plain dark disc, in both themes. */
+.pp-glass.pp-round {
+  background: rgba(0, 0, 0, 0.32);
+  box-shadow: none;
+  color: #fff;
+}
+.pp-round {
+  display: grid;
+  width: 40px;
+  height: 40px;
+  place-items: center;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+/* The page is a size container, so the card can be sized from its width (also inside the settings preview). */
+.pp {
+  container-type: inline-size;
+  /* The screen's height (the settings preview sets --pp-vh to the phone's height). */
+  --pp-vh: 100svh;
+  --card-h: min(calc((100cqw - 24px) * 4 / 3), calc(var(--pp-vh) * 0.72));
+}
+/* The round profile photo, ringed in the page's colour. */
+.pc-avatar,
+.mx-avatar,
+.mx-flyer {
+  box-shadow:
+    0 0 0 4px var(--pf-bg),
+    0 12px 28px -10px rgba(0, 0, 0, 0.55);
+}
+/* While it sits in the middle of the big photo it glows in the owner's colour and the glow
+   pumps like a heartbeat. --glow (1 → 0, set by MorphHero) fades it as it moves to the card. */
+@property --pump {
+  syntax: "<number>";
+  inherits: false;
+  initial-value: 0;
+}
+.mx-avatar,
+.mx-flyer {
+  --halo: color-mix(in srgb, var(--accent) 55%, #fff);
+  --glow: 1;
+  box-shadow:
+    0 0 0 4px var(--pf-bg),
+    0 0 calc((28px + 52px * var(--pump)) * var(--glow)) calc((4px + 20px * var(--pump)) * var(--glow))
+      color-mix(in srgb, var(--halo) calc((60% + 40% * var(--pump)) * var(--glow)), transparent),
+    0 12px 28px -10px rgba(0, 0, 0, 0.55);
+  animation: pp-pump 1.4s ease-out infinite;
+}
+.ios-light .mx-avatar,
+.ios-light .mx-flyer {
+  --halo: var(--accent);
+}
+/* Lub-dub, then rest. */
+@keyframes pp-pump {
+  0% {
+    --pump: 0;
+  }
+  12% {
+    --pump: 1;
+  }
+  26% {
+    --pump: 0.3;
+  }
+  40% {
+    --pump: 0.8;
+  }
+  75%,
+  100% {
+    --pump: 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .mx-avatar,
+  .mx-flyer {
+    animation: none;
+  }
+}
+
+/* The photo, big and blurred behind the top of the page. */
+.pp-ambient {
+  position: absolute;
+  inset: 0 0 auto;
+  height: calc(var(--card-h) + 240px);
+  overflow: hidden;
+  pointer-events: none;
+  opacity: 0.6;
+  -webkit-mask-image: linear-gradient(to bottom, #000 40%, transparent);
+  mask-image: linear-gradient(to bottom, #000 40%, transparent);
+}
+.pp-ambient > img,
+.pp-ambient > div {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: blur(44px) saturate(1.4);
+  transform: scale(1.25);
+}
+.ios-light .pp-ambient {
+  opacity: 0.4;
+}
+
+/* Collapsing header: big photo card → circle avatar (driven by CollapsingHero). */
+.pp-collapse {
+  display: contents;
+}
+.pp-head {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  height: 0;
+}
+.pp-frame {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  right: 12px;
+  height: var(--card-h);
+  overflow: hidden;
+  border-radius: 32px;
+  clip-path: inset(0 round 32px);
+  transform-origin: 50% 0;
+  will-change: transform;
+  background: var(--pf-bg);
+  color: #fff;
+}
+.pp-frame-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 50% 22%;
+}
+.pp-frame-initial {
+  position: absolute;
+  inset: 0 0 auto;
+  display: grid;
+  aspect-ratio: 1;
+  place-items: center;
+  font-size: calc((100cqw - 24px) * 0.42);
+  font-weight: 800;
+  letter-spacing: -0.06em;
+  color: rgba(255, 255, 255, 0.85);
+}
+.pp-frame-shade {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom, rgba(0, 0, 0, 0.28) 0%, transparent 22%, transparent 44%, rgba(0, 0, 0, 0.78) 100%);
+}
+.pp-frame-info {
+  position: absolute;
+  inset: auto 0 0;
+  padding: 0 22px 24px;
+}
+.pp-chip {
+  display: inline-flex;
+  max-width: 100%;
+  align-items: center;
+  height: 28px;
+  margin-bottom: 10px;
+  padding: 0 12px;
+  overflow: hidden;
+  border-radius: 999px;
+  font-size: 12.5px;
+  font-weight: 600;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  background: rgba(0, 0, 0, 0.32);
+}
+.pp-name {
+  font-size: clamp(32px, 9.5vw, 40px);
+  font-weight: 700;
+  line-height: 1.02;
+  letter-spacing: -0.04em;
+  text-wrap: balance;
+  text-shadow: 0 2px 20px rgba(0, 0, 0, 0.3);
+}
+.pp-tagline {
+  margin-top: 8px;
+  font-size: 15px;
+  line-height: 1.35;
+  color: rgba(255, 255, 255, 0.82);
+}
+/* Name and social icons share a row (CollapsingHero stacks them if the name can't fit). */
+.pp-name-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+}
+.pp-name-row .pp-name {
+  flex: 1 1 auto;
+  min-width: 0;
+  font-size: clamp(28px, 9.2cqw, 36px);
+}
+.pp-name-row.is-stacked {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+}
+.pp-name-row.is-stacked .pp-name-socials {
+  margin-bottom: 0;
+}
+.pp-name-row.is-stacked + .pp-tagline {
+  margin-top: 10px;
+}
+.pf-social-icons {
+  display: flex;
+  flex: none;
+  gap: 8px;
+}
+.pp-name-socials {
+  margin-bottom: -4px;
+}
+/* Pull the tagline up toward the name. */
+.pp-name-row + .pp-tagline {
+  margin-top: 4px;
+}
+.pp-name-socials .pf-socials-dot {
+  width: 32px;
+  height: 32px;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.5), 0 4px 12px -4px rgba(0, 0, 0, 0.5);
+}
+.pf-social-icons .pf-socials-dot:active {
+  transform: scale(0.88);
+}
+/* Name under the circle, once collapsed. */
+.pp-mini {
+  position: absolute;
+  top: calc(12px + 96px + 10px);
+  left: 16px;
+  right: 16px;
+  text-align: center;
+  opacity: 0;
+  pointer-events: none;
+  color: var(--ios-label);
+}
+.pp-mini-name {
+  font-size: 21px;
+  font-weight: 700;
+  line-height: 1.15;
+  letter-spacing: -0.03em;
+}
+.pp-mini-sub {
+  margin-top: 3px;
+  overflow: hidden;
+  font-size: 13.5px;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  color: var(--ios-secondary);
+}
+.pp-frame-space {
+  height: calc(var(--card-h) + 12px);
+}
+/* Corner buttons ride on the photo, then float over the page: dark glass reads on both. */
+.pp-head .pp-topbar {
+  top: 24px;
+  left: 24px;
+  right: 24px;
+}
+.pp-topbar {
+  position: absolute;
+  top: calc(env(safe-area-inset-top) + 14px);
+  left: 16px;
+  right: 16px;
+  z-index: 2;
+  display: flex;
+  justify-content: space-between;
+}
+.pp-seg {
+  display: grid;
+  margin-top: 0;
+  padding: 4px;
+  border-radius: 22px;
+}
+.pp-seg-item {
+  position: relative;
+  display: flex;
+  min-height: 56px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  border-radius: 18px;
+  font-size: 12px;
+  font-weight: 600;
+  transition: background-color 150ms ease, transform 120ms ease;
+}
+.pp-seg-item:active {
+  transform: scale(0.96);
+}
+.pp-seg-item + .pp-seg-item:not(.pp-seg-on)::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 16px;
+  bottom: 16px;
+  width: 1px;
+  background: rgba(255, 255, 255, 0.18);
+}
+.pp-seg-on {
+  background: #fff;
+  color: #000;
+  box-shadow: 0 6px 18px -8px rgba(0, 0, 0, 0.45);
+}
+.pp-seg-on + .pp-seg-item::before {
+  display: none;
+}
+
+.pp-body {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  z-index: 1;
+  gap: 12px;
+  margin-top: 16px;
+  padding: 0 16px;
+}
+/* A titled group (About, Contact, Links): a small caps label above a plain card. */
+.pp-section {
+  margin-top: 16px;
+}
+.pp-section-title {
+  margin-bottom: 8px;
+  padding: 0 4px;
+  color: var(--ios-secondary);
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
 /* Quick actions as one segmented bar. */
 .pf-seg > a + a {
   border-left: 1px solid var(--ios-separator);
@@ -183,26 +611,292 @@ select.input {
 .pf-seg > a:active {
   background: var(--ios-cell-pressed);
 }
+/* ───────── Business (brand hero, sheet, offerings) ───────── */
 
-/* Review stars light up one after another, once. */
-.pf-star {
-  animation: pf-star 600ms cubic-bezier(0.3, 1.6, 0.5, 1) calc(500ms + var(--i) * 90ms) both;
+.bz-hero {
+  position: relative;
+  display: flex;
+  height: min(70svh, 600px);
+  min-height: 420px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 0 24px 110px;
+  color: #fff;
+  isolation: isolate;
 }
-@keyframes pf-star {
-  from { opacity: 0.25; transform: scale(0.6); }
-  to { opacity: 1; transform: none; }
+.bz-hero > .absolute {
+  z-index: -1;
+}
+.bz-hero-scrim {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(to bottom, rgba(0, 0, 0, 0.4) 0%, rgba(0, 0, 0, 0.12) 30%, rgba(0, 0, 0, 0.18) 60%, rgba(0, 0, 0, 0.5) 100%),
+    radial-gradient(70% 45% at 50% 48%, rgba(0, 0, 0, 0.22), transparent 70%);
+}
+.bz-hero-title {
+  text-align: center;
+}
+.bz-brand {
+  font-family: var(--font-brand), "Cormorant Garamond", Georgia, serif;
+  font-size: clamp(38px, 12vw, 56px);
+  font-weight: 500;
+  line-height: 0.95;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  text-wrap: balance;
+  text-shadow: 0 2px 30px rgba(0, 0, 0, 0.35);
+}
+.bz-kicker {
+  margin-top: 14px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.32em;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.bz-sheet {
+  position: relative;
+  margin: -96px 12px 0;
+  padding: 12px;
+  border-radius: 32px;
+  background: var(--ios-cell);
+  box-shadow: 0 24px 50px -28px rgba(0, 0, 0, 0.5), inset 0 0 0 1px var(--ios-hairline);
+}
+.bz-thumb {
+  display: block;
+  flex-shrink: 0;
+  width: 104px;
+  height: 104px;
+  overflow: hidden;
+  border-radius: 22px;
+  background: var(--ios-bg);
+}
+.bz-tag {
+  display: inline-flex;
+  max-width: 100%;
+  align-items: center;
+  height: 24px;
+  padding: 0 10px;
+  overflow: hidden;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  background: color-mix(in srgb, var(--ios-label) 7%, transparent);
+  color: var(--ios-secondary);
+}
+.bz-facts {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(0, 1fr));
+  margin-top: 12px;
+  padding: 12px 6px 4px;
+  border-top: 1px solid var(--ios-separator);
+}
+.bz-facts > a + a {
+  padding-left: 14px;
+  border-left: 1px solid var(--ios-separator);
+}
+.bz-fact-label {
+  display: block;
+  font-size: 12px;
+  color: var(--ios-secondary);
+}
+.bz-fact-value {
+  display: block;
+  margin-top: 2px;
+  overflow: hidden;
+  font-size: 15px;
+  font-weight: 600;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.bz-primary {
+  display: flex;
+  width: 100%;
+  height: 56px;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border-radius: 999px;
+  font-size: 16px;
+  font-weight: 600;
+  background: var(--ios-label);
+  color: var(--ios-cell);
+}
+.bz-secondary {
+  display: flex;
+  width: 100%;
+  height: 52px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  font-size: 15px;
+  font-weight: 600;
+  background: color-mix(in srgb, var(--ios-label) 8%, transparent);
+}
+.bz-quick {
+  display: grid;
+  gap: 6px;
+  margin-top: 8px;
+}
+.bz-quick-item {
+  display: flex;
+  height: 58px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  border-radius: 18px;
+  font-size: 12px;
+  font-weight: 600;
+  background: color-mix(in srgb, var(--ios-label) 5%, transparent);
+}
+.bz-card {
+  border-radius: 28px;
+  background: var(--ios-cell);
+  box-shadow: inset 0 0 0 1px var(--ios-hairline), var(--ios-lift);
+}
+.bz-card-title {
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--ios-secondary);
+}
+.bz-row-icon {
+  display: grid;
+  flex-shrink: 0;
+  width: 34px;
+  height: 34px;
+  place-items: center;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--ios-label) 6%, transparent);
+  color: var(--tint);
+}
+
+/* Offerings: filter chips and a two-column, staggered photo grid. */
+.bz-chips {
+  display: flex;
+  gap: 6px;
+  margin: 0 -12px;
+  padding: 0 14px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.bz-chips::-webkit-scrollbar {
+  display: none;
+}
+.bz-chip {
+  flex-shrink: 0;
+  height: 36px;
+  padding: 0 15px;
+  border-radius: 999px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  background: var(--ios-cell);
+  color: var(--ios-label);
+  box-shadow: inset 0 0 0 1px var(--ios-hairline);
+  transition: background-color 150ms ease, color 150ms ease;
+}
+.bz-chip[aria-pressed="true"] {
+  background: var(--ios-label);
+  color: var(--ios-cell);
+}
+.bz-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: start;
+  gap: 10px;
+}
+.bz-col {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.bz-item {
+  display: block;
+  width: 100%;
+  cursor: pointer;
+  text-align: left;
+  transition: transform 150ms ease;
+}
+.bz-item:active {
+  transform: scale(0.97);
+}
+.bz-item-media {
+  position: relative;
+  display: block;
+  overflow: hidden;
+  border-radius: 24px;
+  background: var(--ios-cell);
+}
+.bz-item-blank {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: flex-end;
+  padding: 16px;
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+  background:
+    radial-gradient(90% 70% at 100% 0%, color-mix(in srgb, var(--tint) 30%, transparent), transparent 70%),
+    color-mix(in srgb, var(--tint) 12%, var(--ios-cell));
+  color: var(--ios-label);
+}
+div.bz-item-blank {
+  position: relative;
+}
+.bz-item-plus {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  display: grid;
+  width: 30px;
+  height: 30px;
+  place-items: center;
+  border-radius: 50%;
+  background: #fff;
+  color: #000;
+  box-shadow: 0 4px 12px -4px rgba(0, 0, 0, 0.35);
+}
+.bz-item-caption {
+  position: absolute;
+  inset: auto 0 0;
+  display: block;
+  padding: 36px 14px 13px;
+  color: #fff;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.62), transparent);
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .pf-ring-pulse { display: none; }
   .pf-star { animation: none; }
+  .pp-seg-item:active,
+  .bz-item:active { transform: none; }
 }
 
 @media (hover: hover) {
   .pf-seg > a:hover,
   a.ios-row:hover,
-  a.ios-card:hover {
+  a.ios-card:hover,
+  a.pf-ticket:hover,
+  .pf-socials-item:hover,
+  .bz-chip:not([aria-pressed="true"]):hover,
+  .pf-copy:not([data-copied]):hover {
     background: color-mix(in srgb, var(--ios-cell) 94%, var(--ios-label));
+  }
+  .pp-seg-item:not(.pp-seg-on):hover,
+  .pp-glass.pp-round:hover {
+    background: color-mix(in srgb, currentColor 10%, transparent);
+  }
+  .bz-quick-item:hover {
+    background: color-mix(in srgb, var(--ios-label) 9%, transparent);
   }
 }
 .ios-light {
@@ -339,7 +1033,18 @@ select.input {
   width: 88px;
   height: 88px;
   margin-bottom: 28px;
-  animation: avatar-in 900ms cubic-bezier(0.2, 0.9, 0.25, 1.15) 120ms both;
+  /* When the intro leaves, the profile takes the round photo over (it flies into the hero). */
+  animation:
+    avatar-in 900ms cubic-bezier(0.2, 0.9, 0.25, 1.15) 120ms both,
+    intro-handoff 1ms linear var(--intro-exit) forwards;
+}
+.intro.is-skipped .intro-avatar {
+  visibility: hidden;
+}
+@keyframes intro-handoff {
+  to {
+    opacity: 0;
+  }
 }
 .intro-avatar-img {
   position: absolute;
@@ -415,9 +1120,7 @@ select.input {
   font-size: 13px;
   font-weight: 500;
   color: var(--ios-secondary);
-  background: color-mix(in srgb, var(--ios-cell) 70%, transparent);
-  -webkit-backdrop-filter: blur(12px);
-  backdrop-filter: blur(12px);
+  background: var(--ios-cell);
   animation: fade-in 500ms ease 1100ms both;
 }
 
@@ -469,6 +1172,159 @@ select.input {
 @keyframes reveal-up {
   from { opacity: 0; transform: translateY(18px); filter: blur(6px); }
   to { opacity: 1; transform: none; filter: none; }
+}
+
+/* ── Photo → card morph (MorphHero) ── */
+
+/* One screen tall (at least the card): the card stays pinned while the photo turns into it. */
+.mx-scene {
+  min-height: calc(var(--pp-vh) - env(safe-area-inset-top) - 16px);
+  margin-top: calc(env(safe-area-inset-top) + 16px);
+}
+.mx-pin {
+  position: sticky;
+  top: calc(env(safe-area-inset-top) + 16px);
+}
+.mx-card {
+  opacity: 0;
+}
+/* The big photo. Starts as big as the old hero, centred on the screen (JS takes over on mount). */
+.mx-photo {
+  --mx-h: min(calc((100cqw - 32px) * 4 / 3), calc(var(--pp-vh) * 0.72));
+  position: absolute;
+  z-index: 2;
+  top: calc((var(--pp-vh) - var(--mx-h)) / 2 - env(safe-area-inset-top) - 16px);
+  left: 0;
+  width: 100%;
+  height: var(--mx-h);
+  overflow: hidden;
+  border-radius: 32px;
+  background: var(--pf-bg);
+  color: #fff;
+  box-shadow: 0 24px 60px -30px rgba(0, 0, 0, 0.6);
+}
+/* The big photo's wrapper carries the intro reveal; the photo itself takes taps. */
+.mx-photo-wrap {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+}
+.mx-photo {
+  pointer-events: auto;
+}
+/* The round photo: in the centre of the big photo, then on the card's edge (JS moves it).
+   The flyer is its copy carrying it from the intro, above everything. */
+.mx-avatar,
+.mx-flyer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 3;
+  display: flex;
+  width: 108px;
+  height: 108px;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  border-radius: 50%;
+  font-size: 42px;
+  font-weight: 700;
+  transform-origin: 0 0;
+  pointer-events: none;
+  will-change: transform;
+}
+.mx-avatar {
+  /* Centre of the big photo, before JS measures (116px). */
+  transform: translate(calc((100cqw - 32px) / 2 - 58px), calc(var(--pp-vh) / 2 - env(safe-area-inset-top) - 74px)) scale(1.074);
+}
+.mx-avatar.is-waiting {
+  opacity: 0;
+}
+.mx-flyer {
+  position: fixed;
+  z-index: 61;
+}
+.mx-photo .pp-topbar {
+  top: 12px;
+  left: 12px;
+  right: 12px;
+}
+@media (prefers-reduced-motion: reduce) {
+  /* No morph: just the card. */
+  .mx-scene {
+    min-height: 0;
+  }
+}
+
+/* ── First screen and scroll reveal (personal) ── */
+
+/* The photo settles in after the intro, and the name block rises in line by line. */
+.pp-frame-img {
+  animation: pp-settle 2.6s cubic-bezier(0.2, 0.7, 0.2, 1) var(--reveal-delay, 0ms) both;
+}
+@keyframes pp-settle {
+  from {
+    transform: scale(1.14);
+  }
+}
+.pp-frame-info > * {
+  animation: reveal-up 900ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  animation-delay: calc(var(--reveal-delay, 0ms) + 250ms + var(--i, 0) * 110ms);
+}
+.pp-frame-info > :nth-child(2) {
+  --i: 1;
+}
+.pp-frame-info > :nth-child(3) {
+  --i: 2;
+}
+
+/* Below the hero, each card tips up into place as it scrolls into view, then its rows slide in.
+   Scroll-driven, so it follows your thumb (browsers without it keep the plain reveal).
+   The intro reveal still plays for what's already on screen: it only fills backwards, so once
+   it's done the scroll animation (at its end state for anything in view) takes over. */
+@supports (animation-timeline: view()) {
+  .pp .pp-body > * {
+    transform-origin: 50% 0;
+    animation:
+      pp-rise linear both,
+      reveal-up 800ms cubic-bezier(0.2, 0.8, 0.2, 1) calc(var(--reveal-delay, 0ms) + var(--r, 0) * 70ms) backwards;
+    animation-timeline: view(), auto;
+    animation-range: entry 0% entry 85%, normal;
+  }
+  .pp .pp-body .ios-row {
+    animation: pp-slide linear both;
+    animation-timeline: view();
+    animation-range: entry 15% entry 100%;
+  }
+}
+@keyframes pp-rise {
+  from {
+    opacity: 0;
+    transform: perspective(900px) translateY(64px) rotateX(18deg) scale(0.94);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes pp-slide {
+  from {
+    opacity: 0;
+    transform: translateX(-22px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .pp-frame-img,
+  .pp-frame-info > *,
+  .pp .pp-body > *,
+  .pp .pp-body .ios-row {
+    animation: none;
+  }
 }
 
 /* ───────── New personal card: setup screen ───────── */
@@ -921,4 +1777,332 @@ textarea.ios-input {
 }
 @media (prefers-reduced-motion: reduce) {
   .review-plate { transition: none; }
+}
+
+/* ───────── Personal card: Wallet tab ─────────
+   Cards are credit-card shaped (1.586:1). The stack measures itself with container units,
+   so the server-rendered layout is already right on every phone width. */
+
+.wallet {
+  container-type: inline-size;
+}
+.wallet-stack {
+  --ch: calc(100cqw / 1.586);
+  --wallet-ease: cubic-bezier(0.32, 0.72, 0, 1);
+  position: relative;
+  transition: height 560ms var(--wallet-ease);
+}
+.pass {
+  position: absolute;
+  inset-inline: 0;
+  top: 0;
+  display: block;
+  height: var(--ch);
+  border-radius: 18px;
+  perspective: 1600px;
+  transform-origin: 50% 0;
+  cursor: pointer;
+  text-align: left;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-touch-callout: none;
+  user-select: none;
+  transition: transform 560ms var(--wallet-ease);
+}
+/* Reordering: the lifted card follows the finger, the others slide out of its way. */
+.wallet-stack[data-dragging="true"] .pass {
+  transition: transform 260ms var(--wallet-ease);
+}
+.wallet-stack[data-dragging="true"] .pass[data-dragging="true"] {
+  cursor: grabbing;
+  transition: none;
+}
+.pass[data-dragging="true"] .pass-front {
+  box-shadow:
+    inset 0 0 0 0.5px rgba(255, 255, 255, 0.16),
+    inset 0 1px 0 rgba(255, 255, 255, 0.24),
+    0 26px 50px -14px rgba(0, 0, 0, 0.7);
+}
+.pass[data-holding] .pass-flip {
+  scale: 0.97;
+  transition: scale 280ms ease-out;
+}
+.pass:focus-visible {
+  outline: 2px solid var(--tint, #0a84ff);
+  outline-offset: 3px;
+}
+.pass-flip {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 100%;
+  transform-style: preserve-3d;
+  transition:
+    transform 760ms cubic-bezier(0.3, 0.9, 0.25, 1) 0ms,
+    scale 140ms ease-out 0ms;
+}
+.pass-flip[data-flipped="true"] {
+  transform: rotateY(180deg);
+  transition-delay: 220ms, 0ms;
+}
+.pass:active .pass-flip {
+  scale: 0.985;
+}
+.pass-face {
+  position: absolute;
+  inset: 0;
+  display: block;
+  overflow: hidden;
+  border-radius: 18px;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+.pass-front {
+  box-shadow:
+    inset 0 0 0 0.5px rgba(255, 255, 255, 0.16),
+    inset 0 1px 0 rgba(255, 255, 255, 0.24),
+    0 -1px 0 rgba(0, 0, 0, 0.18),
+    0 16px 34px -16px rgba(0, 0, 0, 0.65);
+}
+/* Soft sheen and rings, like an embossed card. */
+.pass-front::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(120% 80% at 0% 0%, rgba(255, 255, 255, 0.22), transparent 55%);
+  pointer-events: none;
+}
+.pass-rings {
+  position: absolute;
+  right: -30%;
+  bottom: -55%;
+  width: 90%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: repeating-radial-gradient(circle, transparent 0 18px, color-mix(in srgb, currentColor 9%, transparent) 18px 19px);
+  opacity: 0.9;
+  pointer-events: none;
+}
+.pass-back {
+  display: flex;
+  gap: 14px;
+  padding: 14px;
+  background: #fff;
+  color: #1c1c1e;
+  transform: rotateY(180deg);
+  box-shadow:
+    inset 0 0 0 0.5px rgba(0, 0, 0, 0.08),
+    0 16px 34px -16px rgba(0, 0, 0, 0.5);
+}
+.pass-qr {
+  display: block;
+  height: 100%;
+  aspect-ratio: 1;
+  flex-shrink: 0;
+}
+.wallet-actions {
+  position: absolute;
+  inset-inline: 0;
+  top: calc(var(--ch) + 16px);
+  z-index: 60;
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  opacity: 0;
+  transform: translateY(-6px);
+  pointer-events: none;
+  transition:
+    opacity 220ms ease,
+    transform 320ms var(--wallet-ease);
+}
+.wallet-stack[data-open="true"] .wallet-actions {
+  opacity: 1;
+  transform: none;
+  pointer-events: auto;
+  transition-delay: 380ms;
+}
+.wallet-btn {
+  display: inline-flex;
+  height: 40px;
+  align-items: center;
+  border-radius: 999px;
+  padding: 0 20px;
+  background: var(--ios-cell);
+  color: var(--ios-label);
+  font-size: 15px;
+  font-weight: 600;
+  box-shadow: inset 0 0 0 1px var(--ios-hairline);
+  cursor: pointer;
+  transition: transform 100ms ease-out;
+}
+.wallet-btn:active {
+  transform: scale(0.96);
+}
+.wallet-btn-primary {
+  background: var(--tint);
+  color: var(--on-tint, #fff);
+}
+
+/* Floating tab bar (Profile | Wallet) with a sliding highlight. */
+.tabbar {
+  position: fixed;
+  left: 50%;
+  bottom: calc(env(safe-area-inset-bottom) + 14px);
+  z-index: 50;
+  translate: -50% 0;
+  border-radius: 999px;
+  padding: 5px;
+  background: var(--ios-cell);
+  box-shadow:
+    inset 0 0 0 0.5px color-mix(in srgb, var(--ios-label) 14%, transparent),
+    0 12px 34px -12px rgba(0, 0, 0, 0.45);
+}
+.tabbar-list {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(2, 96px);
+}
+.tabbar-pill {
+  position: absolute;
+  inset-block: 0;
+  left: 0;
+  width: 96px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--ios-label) 9%, transparent);
+  transform: translateX(calc(var(--i, 0) * 96px));
+  transition: transform 420ms cubic-bezier(0.32, 0.72, 0, 1);
+}
+.tabbar-item {
+  position: relative;
+  display: flex;
+  height: 50px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1px;
+  border-radius: 999px;
+  color: var(--ios-secondary);
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: color 200ms ease;
+}
+.tabbar-item[aria-selected="true"] {
+  color: var(--tint);
+}
+.tabbar-item:focus-visible {
+  outline: 2px solid var(--tint);
+  outline-offset: -2px;
+}
+.tab-in {
+  animation: tab-in 420ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+@keyframes tab-in {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wallet-stack,
+  .pass,
+  .tabbar-pill,
+  .wallet-actions {
+    transition: none;
+  }
+  /* No 3D flip: the QR side simply fades in. */
+  .pass-flip,
+  .pass-flip[data-flipped="true"] {
+    transform: none;
+    transition: none;
+  }
+  .pass-back {
+    transform: none;
+    opacity: 0;
+    transition: opacity 150ms ease;
+  }
+  .pass-flip[data-flipped="true"] .pass-back {
+    opacity: 1;
+  }
+  .tab-in {
+    animation: none;
+  }
+}
+
+/* ───────── Owner settings: live preview + unsaved bar ───────── */
+
+.phone-frame {
+  height: min(740px, calc(100dvh - 130px));
+  aspect-ratio: 360 / 740;
+  border-radius: 46px;
+  padding: 10px;
+  background: #0b0b0c;
+  box-shadow:
+    inset 0 0 0 1.5px #2c2c2e,
+    0 0 0 1px rgba(0, 0, 0, 0.4),
+    0 30px 60px -20px rgba(0, 0, 0, 0.55);
+}
+.phone-frame .phone-screen {
+  height: 100%;
+  border-radius: 37px;
+}
+/* The transform makes this the containing block for the profile's fixed parts
+   (intro, tab bar), so they stay inside the preview instead of covering the page. */
+.phone-screen {
+  position: relative;
+  overflow: hidden;
+  transform: translateZ(0);
+}
+.phone-scroll {
+  height: 100%;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: none;
+}
+.phone-scroll::-webkit-scrollbar {
+  display: none;
+}
+.phone-scroll > main {
+  min-height: 100%;
+}
+
+.savebar {
+  position: fixed;
+  left: 50%;
+  bottom: calc(env(safe-area-inset-bottom) + 86px);
+  z-index: 45;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  border-radius: 999px;
+  padding: 5px 5px 5px 10px;
+  background: color-mix(in srgb, var(--ios-cell) 82%, transparent);
+  -webkit-backdrop-filter: saturate(180%) blur(24px);
+  backdrop-filter: saturate(180%) blur(24px);
+  box-shadow:
+    inset 0 0 0 0.5px color-mix(in srgb, var(--ios-label) 14%, transparent),
+    0 12px 34px -12px rgba(0, 0, 0, 0.45);
+  translate: -50% 16px;
+  opacity: 0;
+  pointer-events: none;
+  transition:
+    opacity 220ms ease,
+    translate 380ms cubic-bezier(0.32, 0.72, 0, 1);
+}
+.savebar[data-show="true"] {
+  translate: -50% 0;
+  opacity: 1;
+  pointer-events: auto;
+}
+@media (min-width: 1024px) {
+  .savebar {
+    bottom: 28px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .savebar {
+    transition: none;
+  }
+}
+.ios-light .pp-body .pp-seg-item + .pp-seg-item:not(.pp-seg-on)::before {
+  background: var(--ios-separator);
 }
